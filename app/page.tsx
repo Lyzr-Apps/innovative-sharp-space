@@ -27,11 +27,19 @@ const AGENT_ID = '695bb11f6363be71980ee619'
 const KNOWLEDGE_BASE_ID = '695bb1191fd00875a2eb68cf'
 
 // Types
+interface AgentResponse {
+  answer?: string
+  sources?: string[]
+  confidence?: number
+  suggested_actions?: string[]
+}
+
 interface Message {
   id: string
   role: 'user' | 'agent'
   content: string
   timestamp: Date
+  agentData?: AgentResponse
 }
 
 interface Conversation {
@@ -74,15 +82,69 @@ function MessageBubble({ message }: { message: Message }) {
         </div>
       )}
       <div
-        className={`max-w-xs px-4 py-2 rounded-lg ${
+        className={`max-w-sm px-4 py-3 rounded-lg ${
           isUser
             ? 'bg-blue-500 text-white rounded-br-none'
             : 'bg-gray-100 text-gray-800 rounded-bl-none'
         }`}
       >
-        <p className="text-sm">{message.content}</p>
+        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+
+        {/* Agent Response Data */}
+        {!isUser && message.agentData && (
+          <div className="mt-3 space-y-2 text-xs">
+            {/* Sources */}
+            {message.agentData.sources && message.agentData.sources.length > 0 && (
+              <div className="pt-2 border-t border-gray-300">
+                <p className="font-semibold text-gray-700 mb-1">Sources:</p>
+                <div className="flex flex-wrap gap-1">
+                  {message.agentData.sources.map((source, idx) => (
+                    <span
+                      key={idx}
+                      className="px-2 py-1 bg-blue-50 text-blue-600 rounded border border-blue-200"
+                    >
+                      {source}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Confidence Score */}
+            {message.agentData.confidence !== undefined && (
+              <div className="flex items-center gap-2 text-gray-600">
+                <span>Confidence:</span>
+                <div className="w-16 h-1.5 bg-gray-300 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-green-500"
+                    style={{ width: `${Math.min(message.agentData.confidence * 100, 100)}%` }}
+                  />
+                </div>
+                <span className="text-gray-500">
+                  {(message.agentData.confidence * 100).toFixed(0)}%
+                </span>
+              </div>
+            )}
+
+            {/* Suggested Actions */}
+            {message.agentData.suggested_actions && message.agentData.suggested_actions.length > 0 && (
+              <div className="pt-2 border-t border-gray-300">
+                <p className="font-semibold text-gray-700 mb-1">Next Steps:</p>
+                <ul className="space-y-1">
+                  {message.agentData.suggested_actions.map((action, idx) => (
+                    <li key={idx} className="flex gap-2 text-gray-600">
+                      <span className="text-blue-500">•</span>
+                      <span>{action}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+
         <span
-          className={`text-xs mt-1 block ${isUser ? 'text-blue-100' : 'text-gray-500'}`}
+          className={`text-xs mt-2 block ${isUser ? 'text-blue-100' : 'text-gray-500'}`}
         >
           {message.timestamp.toLocaleTimeString([], {
             hour: '2-digit',
@@ -443,22 +505,40 @@ export default function HomePage() {
       const data = await response.json()
 
       let agentContent = 'I apologize, but I encountered an error. Please try again.'
+      let agentData: AgentResponse | undefined
 
       if (data.success && data.response) {
-        // Handle both structured JSON and plain text responses
-        if (typeof data.response === 'string') {
-          agentContent = data.response
-        } else if (typeof data.response === 'object') {
-          // Try to extract meaningful content from structured response
-          if (data.response.message) {
+        // Handle structured agent response with answer, sources, confidence, suggested_actions
+        if (typeof data.response === 'object') {
+          // Check if this is a structured response from the knowledge base agent
+          if (data.response.answer) {
+            agentContent = data.response.answer
+            agentData = {
+              answer: data.response.answer,
+              sources: data.response.sources,
+              confidence: data.response.confidence,
+              suggested_actions: data.response.suggested_actions,
+            }
+          } else if (data.response.message) {
             agentContent = data.response.message
           } else if (data.response.result) {
-            agentContent = JSON.stringify(data.response.result, null, 2)
+            if (typeof data.response.result === 'string') {
+              agentContent = data.response.result
+            } else if (data.response.result.answer) {
+              agentContent = data.response.result.answer
+              agentData = data.response.result
+            } else {
+              agentContent = JSON.stringify(data.response.result, null, 2)
+            }
           } else if (data.response.response) {
             agentContent = String(data.response.response)
+          } else if (typeof data.response === 'string') {
+            agentContent = data.response
           } else {
             agentContent = JSON.stringify(data.response, null, 2)
           }
+        } else if (typeof data.response === 'string') {
+          agentContent = data.response
         }
       } else if (data.raw_response) {
         agentContent = data.raw_response
@@ -469,6 +549,7 @@ export default function HomePage() {
         role: 'agent',
         content: agentContent,
         timestamp: new Date(),
+        agentData,
       }
 
       setMessages((prev) => [...prev, agentMessage])
