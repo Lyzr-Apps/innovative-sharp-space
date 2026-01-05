@@ -507,10 +507,23 @@ export default function HomePage() {
       let agentContent = 'I apologize, but I encountered an error. Please try again.'
       let agentData: AgentResponse | undefined
 
-      if (data.success && data.response) {
-        // Handle structured agent response with answer, sources, confidence, suggested_actions
+      // Try to extract agent message from various response formats
+      if (data.result && typeof data.result === 'object') {
+        // Format: { status: "success", result: { answer, sources, confidence, suggested_actions } }
+        if (data.result.answer) {
+          agentContent = data.result.answer
+          agentData = {
+            answer: data.result.answer,
+            sources: data.result.sources,
+            confidence: data.result.confidence,
+            suggested_actions: data.result.suggested_actions,
+          }
+        } else {
+          agentContent = JSON.stringify(data.result, null, 2)
+        }
+      } else if (data.success && data.response) {
+        // Format: { success: true, response: { answer, ... } }
         if (typeof data.response === 'object') {
-          // Check if this is a structured response from the knowledge base agent
           if (data.response.answer) {
             agentContent = data.response.answer
             agentData = {
@@ -521,17 +534,9 @@ export default function HomePage() {
             }
           } else if (data.response.message) {
             agentContent = data.response.message
-          } else if (data.response.result) {
-            if (typeof data.response.result === 'string') {
-              agentContent = data.response.result
-            } else if (data.response.result.answer) {
-              agentContent = data.response.result.answer
-              agentData = data.response.result
-            } else {
-              agentContent = JSON.stringify(data.response.result, null, 2)
-            }
-          } else if (data.response.response) {
-            agentContent = String(data.response.response)
+          } else if (data.response.result?.answer) {
+            agentContent = data.response.result.answer
+            agentData = data.response.result
           } else if (typeof data.response === 'string') {
             agentContent = data.response
           } else {
@@ -541,7 +546,15 @@ export default function HomePage() {
           agentContent = data.response
         }
       } else if (data.raw_response) {
-        agentContent = data.raw_response
+        // Fallback: raw response from API
+        if (typeof data.raw_response === 'string') {
+          agentContent = data.raw_response
+        } else if (data.raw_response.answer) {
+          agentContent = data.raw_response.answer
+          agentData = data.raw_response
+        } else {
+          agentContent = JSON.stringify(data.raw_response, null, 2)
+        }
       }
 
       const agentMessage: Message = {
