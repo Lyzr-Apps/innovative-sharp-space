@@ -1,0 +1,56 @@
+{
+  "agent_name": "Customer Support Agent",
+  "agent_id": "695bb11f6363be71980ee619",
+  "agent_purpose": "assistant",
+  "description": "Provides customer support by answering queries using knowledge base with conversational context and friendly tone",
+  "response_schema": {
+    "status": "string",
+    "result": {
+      "answer": "string",
+      "sources": [
+        "any"
+      ],
+      "confidence": "number",
+      "suggested_actions": [
+        "string"
+      ]
+    },
+    "metadata": {
+      "agent_name": "string",
+      "timestamp": "string"
+    }
+  },
+  "example_response": {
+    "status": "error",
+    "result": {
+      "answer": "I'm sorry, but I don't have information about resetting your password in the current knowledge base. I recommend reaching out to customer support directly for assistance with password resets.",
+      "sources": [],
+      "confidence": 0.4,
+      "suggested_actions": [
+        "Contact support directly for help with resetting your password."
+      ]
+    },
+    "metadata": {
+      "agent_name": "Customer Support Agent",
+      "timestamp": "2024-06-10T13:49:41Z"
+    }
+  },
+  "is_actual_tested": true,
+  "actual_test_response": {
+    "status": "error",
+    "result": {
+      "answer": "I'm sorry, but I don't have information about resetting your password in the current knowledge base. I recommend reaching out to customer support directly for assistance with password resets.",
+      "sources": [],
+      "confidence": 0.4,
+      "suggested_actions": [
+        "Contact support directly for help with resetting your password."
+      ]
+    },
+    "metadata": {
+      "agent_name": "Customer Support Agent",
+      "timestamp": "2024-06-10T13:49:41Z"
+    }
+  },
+  "test_timestamp": "2026-01-05T12:41:50.612469",
+  "test_passed": true
+}

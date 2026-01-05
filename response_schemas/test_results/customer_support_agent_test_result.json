@@ -1,0 +1,25 @@
+{
+  "agent_name": "Customer Support Agent",
+  "agent_id": "695bb11f6363be71980ee619",
+  "test_message": "How do I reset my password?",
+  "expected_purpose": "assistant",
+  "timestamp": "2026-01-05T12:41:50.611107",
+  "is_valid_json": true,
+  "validation_errors": [],
+  "actual_response": {
+    "status": "error",
+    "result": {
+      "answer": "I'm sorry, but I don't have information about resetting your password in the current knowledge base. I recommend reaching out to customer support directly for assistance with password resets.",
+      "sources": [],
+      "confidence": 0.4,
+      "suggested_actions": [
+        "Contact support directly for help with resetting your password."
+      ]
+    },
+    "metadata": {
+      "agent_name": "Customer Support Agent",
+      "timestamp": "2024-06-10T13:49:41Z"
+    }
+  },
+  "raw_response": "{\n  \"status\": \"error\",\n  \"result\": {\n    \"answer\": \"I'm sorry, but I don't have information about resetting your password in the current knowledge base. I recommend reaching out to customer support directly for assistance with password resets.\",\n    \"sources\": [],\n    \"confidence\": 0.4,\n    \"suggested_actions\": [\"Contact support directly for help with resetting your password.\"]\n  },\n  \"metadata\": {\n    \"agent_name\": \"Customer Support Agent\",\n    \"timestamp\": \"2024-06-10T13:49:41Z\"\n  }\n}"
+}
